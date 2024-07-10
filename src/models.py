@@ -40,7 +40,7 @@ class CompanyData:
 
 
 @dataclass
-class DataDifference:
+class MismatchedFields:
     field_name: str
     uploaded_value: Any
     stored_value: Any
@@ -53,7 +53,7 @@ class DataDifference:
 class ValidatorResponse:
     uploaded_data: CompanyData
     stored_data: CompanyData
-    data_difference: list[DataDifference]
+    mismatched_fields: list[MismatchedFields]
 
     def to_json(self):
         return json.dumps(dataclasses.asdict(self))

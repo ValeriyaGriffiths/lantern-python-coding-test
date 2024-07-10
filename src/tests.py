@@ -1,8 +1,9 @@
 # Write your tests here
 import unittest
+from decimal import Decimal
 from unittest.mock import patch
 from src.data_layer import load_company_data, parse_company_data
-from src.models import CompanyData
+from src.models import CompanyData, ValidatorResponse, MismatchedFields
 
 
 class TestDataLayer(unittest.TestCase):
@@ -53,7 +54,7 @@ class TestDataLayer(unittest.TestCase):
             'Number of Employees': 3000
         }
         expected_result = CompanyData(
-            company_name=company_data_dict['Company Name'],
+            company_name='HealthInc',
             industry='Healthcare',
             market_capitalization=3000.0,
             revenue=1000.00,
@@ -105,7 +106,7 @@ class TestDataLayer(unittest.TestCase):
             'Location': 'New York, NY',
         }
         expected_result = CompanyData(
-            company_name=company_data_dict['Company Name'],
+            company_name='HealthInc',
             industry='Healthcare',
             market_capitalization=3000.0,
             revenue=1000.00,
@@ -128,6 +129,55 @@ class TestDataLayer(unittest.TestCase):
         )
 
         result = parse_company_data(company_data_dict)
+
+        self.assertEqual(result, expected_result)
+
+
+class TestModels(unittest.TestCase):
+    mock_company_data_obj = CompanyData(
+            company_name='HealthInc',
+            industry='Healthcare',
+            market_capitalization=3000.0,
+            revenue=1000.00,
+            ebitda=250,
+            net_income=80,
+            debt=150,
+            equity=666,
+            enterprise_value=3150,
+            pe_ratio=15,
+            revenue_growth_rate=12,
+            ebitda_margin=40,
+            net_income_margin=8,
+            roe=13.33,
+            roa=10,
+            current_ratio=1,
+            debt_to_equity_ratio=0.25,
+            location='New York, NY',
+            ceo='Jane Smith',
+            number_of_employees=3000,
+        )
+
+    def test_ValidatorResponse_to_json(self):
+        mock_mismatched_data = [
+            MismatchedFields(field_name='fake name', stored_value='fake value', uploaded_value='fake value')]
+        validator_resp = ValidatorResponse(stored_data=self.mock_company_data_obj,
+                                           uploaded_data=self.mock_company_data_obj,
+                                           mismatched_fields=mock_mismatched_data)
+        expected_result = ('{"uploaded_data": {"company_name": "HealthInc", "industry": "Healthcare", '
+                           '"market_capitalization": 3000.0, "revenue": 1000.0, "ebitda": 250, "net_income": 80, '
+                           '"debt": 150, "equity": 666, "enterprise_value": 3150, "pe_ratio": 15, '
+                           '"revenue_growth_rate": 12, "ebitda_margin": 40, "net_income_margin": 8, "roe": 13.33, '
+                           '"roa": 10, "current_ratio": 1, "debt_to_equity_ratio": 0.25, "location": "New York, NY", '
+                           '"ceo": "Jane Smith", "number_of_employees": 3000}, "stored_data": {"company_name": '
+                           '"HealthInc", "industry": "Healthcare", "market_capitalization": 3000.0, "revenue": '
+                           '1000.0, "ebitda": 250, "net_income": 80, "debt": 150, "equity": 666, "enterprise_value": '
+                           '3150, "pe_ratio": 15, "revenue_growth_rate": 12, "ebitda_margin": 40, '
+                           '"net_income_margin": 8, "roe": 13.33, "roa": 10, "current_ratio": 1, '
+                           '"debt_to_equity_ratio": 0.25, "location": "New York, NY", "ceo": "Jane Smith", '
+                           '"number_of_employees": 3000}, "mismatched_fields": [{"field_name": "fake name", '
+                           '"uploaded_value": "fake value", "stored_value": "fake value"}]}')
+
+        result = validator_resp.to_json()
 
         self.assertEqual(result, expected_result)
 
