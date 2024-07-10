@@ -26,6 +26,7 @@ COMPANY_DATA_KEY_MAPPING = {
     'number_of_employees': 'Number of Employees'
 }
 
+
 def load_company_data(company_name: str) -> CompanyData | None:
     """
     Fetch stored company data matching company name. Return None if no match found.
@@ -78,4 +79,3 @@ def parse_company_data(company_data: dict) -> CompanyData:
     #                    ceo=company_data['CEO'],
     #                    number_of_employees=company_data['Number of Employees']
     #                    )
-

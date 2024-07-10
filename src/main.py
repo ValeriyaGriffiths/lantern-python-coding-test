@@ -36,7 +36,7 @@ def validate_company_pdf(company_name: str, data_file: UploadFile = File(...)):
     mismatched_fields: list[MismatchedFields] = []
     # validate(uploaded_data=extracted_data, stored_data=stored_data)
 
-    validator_response = ValidatorResponse(uploaded_data=extracted_data, stored_data=stored_data, data_difference=mismatched_fields)
+    validator_response = ValidatorResponse(uploaded_data=extracted_data, stored_data=stored_data, mismatched_fields=mismatched_fields)
     
 
     # assumed company name is provided by user, assume exact match
