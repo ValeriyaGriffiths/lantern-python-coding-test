@@ -7,6 +7,10 @@ from typing import Any
 
 @dataclass
 class CompanyData:
+    """
+    Assumed net_income_margin, ceo, number_of_employees to be optional based on provided data.
+    """
+
     company_name: str
     industry: str
     market_capitalization: Decimal
@@ -19,17 +23,14 @@ class CompanyData:
     pe_ratio: Decimal
     revenue_growth_rate: Decimal
     ebitda_margin: Decimal
-    net_income_margin: Decimal
+    net_income_margin: Decimal | None
     roe: Decimal
     roa: Decimal
     current_ratio: Decimal
     debt_to_equity_ratio: Decimal
     location: str
-    ceo: str
-    number_of_employees: int
-
-    # def to_json(self):
-    #     return json.dumps(dataclasses.asdict(self))
+    ceo: str | None
+    number_of_employees: int | None
 
     def __eq__(self, other):
         """
@@ -45,12 +46,8 @@ class MismatchedFields:
     uploaded_value: Any
     stored_value: Any
 
-    # def to_json(self):
-    #     return json.dumps(dataclasses.asdict(self))
-
-
 @dataclass
-class ValidatorResponse:
+class DataDiscrepancyCheckerResponse:
     uploaded_data: CompanyData
     stored_data: CompanyData
     mismatched_fields: list[MismatchedFields]

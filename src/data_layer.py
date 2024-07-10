@@ -57,25 +57,3 @@ def parse_company_data(company_data: dict) -> CompanyData:
         parsed_fields[f.name] = Decimal(field_value) if field_value and f.type == Decimal else field_value
 
     return CompanyData(**parsed_fields)
-
-    # return CompanyData(company_name=company_data['Company Name'],
-    #                    industry=company_data['Industry'],
-    #                    market_capitalization=Decimal(company_data['Market Capitalization']),
-    #                    revenue=company_data['Revenue (in millions)'],
-    #                    ebitda=company_data['EBITDA (in millions)'],
-    #                    net_income=company_data['Net Income (in millions)'],
-    #                    debt=company_data['Debt (in millions)'],
-    #                    equity=company_data['Equity (in millions)'],
-    #                    enterprise_value=company_data['Enterprise Value (in millions)'],
-    #                    pe_ratio=company_data['P/E Ratio'],
-    #                    revenue_growth_rate=company_data['Revenue Growth Rate (%)'],
-    #                    ebitda_margin=company_data['EBITDA Margin (%)'],
-    #                    net_income_margin=company_data['Net Income Margin (%)'],
-    #                    roe=company_data['ROE (Return on Equity) (%)'],
-    #                    roa=company_data['ROA (Return on Assets) (%)'],
-    #                    current_ratio=company_data['Current Ratio'],
-    #                    debt_to_equity_ratio=company_data['Debt to Equity Ratio'],
-    #                    location=company_data['Location'],
-    #                    ceo=company_data['CEO'],
-    #                    number_of_employees=company_data['Number of Employees']
-    #                    )

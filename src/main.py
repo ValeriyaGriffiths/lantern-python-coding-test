@@ -2,7 +2,7 @@ from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import JSONResponse
 from data_layer import load_company_data, parse_company_data
 # from data_validator import validate
-from models import CompanyData, MismatchedFields, ValidatorResponse
+from models import CompanyData, MismatchedFields, DataDiscrepancyCheckerResponse
 from pdf_service import PdfService
 
 
@@ -36,7 +36,7 @@ def validate_company_pdf(company_name: str, data_file: UploadFile = File(...)):
     mismatched_fields: list[MismatchedFields] = []
     # validate(uploaded_data=extracted_data, stored_data=stored_data)
 
-    validator_response = ValidatorResponse(uploaded_data=extracted_data, stored_data=stored_data, mismatched_fields=mismatched_fields)
+    validator_response = DataDiscrepancyCheckerResponse(uploaded_data=extracted_data, stored_data=stored_data, mismatched_fields=mismatched_fields)
     
 
     # assumed company name is provided by user, assume exact match
