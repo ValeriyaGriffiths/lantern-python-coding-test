@@ -61,6 +61,7 @@ class DataDiscrepancyCheckerResponse:
     mismatched_fields: list[MismatchedFields]
 
     def to_json(self):
+        # TODO fix Decimal issue
         return json.dumps(dataclasses.asdict(self))
 
     def __eq__(self, other):

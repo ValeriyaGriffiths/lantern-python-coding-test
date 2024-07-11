@@ -1,4 +1,4 @@
-from pdf_service import PdfService
+from src.pdf_service import PdfService
 from src.data_layer import parse_company_data
 from src.models import CompanyData
 
@@ -15,6 +15,7 @@ def extract_and_parse_pdf_data(company_name: str, pdf_file) -> CompanyData:
     Calls PdfService to extract data from pdf file corresponding to comp
 
     :param company_name: name of company
+    :param pdf_file: pdf file to extract
     :return: CompanyData object containing extracted data
     """
 

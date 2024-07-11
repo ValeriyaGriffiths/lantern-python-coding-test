@@ -1,4 +1,5 @@
 import unittest
+import requests
 from unittest.mock import patch, Mock
 from src.data_discrepancy_checker import get_mismatched_fields, validate_company_data
 from src.data_layer import load_company_data, parse_company_data, COMPANY_DATA_KEY_MAPPING
@@ -7,7 +8,7 @@ from src.models import CompanyData, DataDiscrepancyCheckerResponse, MismatchedFi
 
 class TestDataLayer(unittest.TestCase):
     partial_company_data = dict(
-        company_name='HealthInc',
+        company_name='Fake',
         industry='Healthcare',
         market_capitalization=3000.0,
         revenue=1000.00,
@@ -90,7 +91,7 @@ class TestModels(unittest.TestCase):
         :return:
         """
         mock_company_data = CompanyData(
-            company_name='HealthInc',
+            company_name='Fake',
             industry='Healthcare',
             market_capitalization=3000.0,
             revenue=1000.00,
@@ -116,13 +117,13 @@ class TestModels(unittest.TestCase):
         validated_resp = DataDiscrepancyCheckerResponse(stored_data=mock_company_data,
                                                         uploaded_data=mock_company_data,
                                                         mismatched_fields=mock_mismatched_data)
-        expected_result = ('{"uploaded_data": {"company_name": "HealthInc", "industry": "Healthcare", '
+        expected_result = ('{"uploaded_data": {"company_name": "Fake", "industry": "Healthcare", '
                            '"market_capitalization": 3000.0, "revenue": 1000.0, "ebitda": 250, "net_income": 80, '
                            '"debt": 150, "equity": 666, "enterprise_value": 3150, "pe_ratio": 15, '
                            '"revenue_growth_rate": 12, "ebitda_margin": 40, "net_income_margin": 8, "roe": 13.33, '
                            '"roa": 10, "current_ratio": 1, "debt_to_equity_ratio": 0.25, "location": "New York, NY", '
                            '"ceo": "Jane Smith", "number_of_employees": 3000}, "stored_data": {"company_name": '
-                           '"HealthInc", "industry": "Healthcare", "market_capitalization": 3000.0, "revenue": '
+                           '"Fake", "industry": "Healthcare", "market_capitalization": 3000.0, "revenue": '
                            '1000.0, "ebitda": 250, "net_income": 80, "debt": 150, "equity": 666, "enterprise_value": '
                            '3150, "pe_ratio": 15, "revenue_growth_rate": 12, "ebitda_margin": 40, '
                            '"net_income_margin": 8, "roe": 13.33, "roa": 10, "current_ratio": 1, '
@@ -138,7 +139,7 @@ class TestModels(unittest.TestCase):
 class TestDataDiscrepancyChecker(unittest.TestCase):
     def setUp(self):
         self.company_data1 = CompanyData(
-            company_name='HealthInc',
+            company_name='Fake',
             industry='Healthcare',
             market_capitalization=3000.0,
             revenue=1000.00,
@@ -183,14 +184,15 @@ class TestDataDiscrepancyChecker(unittest.TestCase):
         )
         mismatched_field_names = ['company_name', 'revenue', 'number_of_employees']
         self.mismatched_fields = [
-            MismatchedFields(field_name=f, stored_value=getattr(self.company_data1, f), uploaded_value=getattr(self.company_data2,f))
+            MismatchedFields(field_name=f, stored_value=getattr(self.company_data1, f),
+                             uploaded_value=getattr(self.company_data2, f))
             for f in mismatched_field_names
         ]
 
     @patch("src.data_discrepancy_checker.get_mismatched_fields")
     def test_validate_company_data(self, mock_get_mismatched_fields):
         """
-        Expect get_mismatched_fields to be called
+        Expect get_mismatched_fields to be called and DataDiscrepancyCheckerResponse to be returned
         """
         mock_get_mismatched_fields.return_value = self.mismatched_fields
         expected_result = DataDiscrepancyCheckerResponse(uploaded_data=self.company_data1,
@@ -215,40 +217,50 @@ class TestDataDiscrepancyChecker(unittest.TestCase):
     def test_get_mismatched_fields_empty_list(self):
         """
         Expect get_mismatched_fields to return empty list for identical data.
-        :return:
         """
 
         result = get_mismatched_fields(stored_data=self.company_data1, extracted_data=self.company_data1)
 
         self.assertEqual(result, [])
 
+
 class TestPdfServiceApi(unittest.TestCase):
-    pass
+    @patch('src.pdf_service_api.parse_company_data')
+    def test_extract_and_parse_pdf_data(self, mock_parse_company_data):
+        pass
 
 
 class TestAPI(unittest.TestCase):
-    def test_validate_pdf_company_data(self):
+    @patch('src.main.validate_company_data')
+    def test_validate_pdf_company_data(self, mock_validate_company_data):
         """
         Expect validated response from validate_pdf_company_data endpoint.
         # TODO header with key?
         # hit the endpoint as a user; pass name and file, return json w data
         """
+        mock_validate_company_data = Mock()
+        mock_validate_company_data.return_value.to_json.return_value = {'fake': 'response'}
 
-        self.assertEqual('foo'.upper(), 'FOO')
+        resp = requests.get('http://example.com/api/123')
+
+        self.assertEqual(resp.message, {'fake': 'response'})
+        self.assertEqual(resp.status_code, 200)
 
     def test_validate_pdf_company_data_return_data_error(self):
         """
         Expect error response if no stored data found.
         """
-
-        exp_err = "No data found for this company name."
+        resp = None
+        self.assertEqual(resp.message, "No data found for this company name.")
+        self.assertEqual(resp.status_code, 500)
 
     def test_validate_pdf_company_data_return_file_error(self):
         """
         Expect error response if cannot extract file data.
         """
-
-        exp_err = "Cannot extract data. Invalid file provided."
+        resp = None
+        self.assertEqual(resp.message,"Cannot extract data. Invalid file provided.")
+        self.assertEqual(resp.status_code, 400)
 
 
 if __name__ == '__main__':

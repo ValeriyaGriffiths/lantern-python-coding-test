@@ -1,7 +1,7 @@
 import csv
 import dataclasses
 from decimal import Decimal
-from models import CompanyData
+from src.models import CompanyData
 
 COMPANY_DATA_KEY_MAPPING = {
     'company_name': 'Company Name',
@@ -34,7 +34,7 @@ def load_company_data(company_name: str) -> CompanyData | None:
     :param company_name: name of company
     :return: CompanyData object if found, otherwise None
     """
-    with open('../data/database.csv', newline='') as csvfile:
+    with open('data/database.csv', newline='') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
             if row['Company Name'] == company_name:

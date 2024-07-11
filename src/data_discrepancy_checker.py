@@ -1,5 +1,5 @@
 from dataclasses import fields
-from models import CompanyData, MismatchedFields, DataDiscrepancyCheckerResponse
+from src.models import CompanyData, MismatchedFields, DataDiscrepancyCheckerResponse
 
 
 def validate_company_data(extracted_data: CompanyData, stored_data: CompanyData) -> DataDiscrepancyCheckerResponse:
