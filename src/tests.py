@@ -1,6 +1,6 @@
 import io
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 from src.data_discrepancy_checker import get_mismatched_fields, validate_company_data
 from src.data_layer import load_company_data, parse_company_data, COMPANY_DATA_KEY_MAPPING
 from src.models import CompanyData, DataDiscrepancyCheckerResponse, MismatchedFields
@@ -81,59 +81,6 @@ class TestDataLayer(unittest.TestCase):
         expected_result = CompanyData(ceo=None, number_of_employees=None, **self.partial_company_data)
 
         result = parse_company_data(company_data_dict)
-
-        self.assertEqual(result, expected_result)
-
-
-class TestModels(unittest.TestCase):
-
-    def test_ValidatorResponse_to_json(self):
-        """
-
-        :return:
-        """
-        mock_company_data = CompanyData(
-            company_name='Fake',
-            industry='Healthcare',
-            market_capitalization=3000.0,
-            revenue=1000.00,
-            ebitda=250,
-            net_income=80,
-            debt=150,
-            equity=666,
-            enterprise_value=3150,
-            pe_ratio=15,
-            revenue_growth_rate=12,
-            ebitda_margin=40,
-            net_income_margin=8,
-            roe=13.33,
-            roa=10,
-            current_ratio=1,
-            debt_to_equity_ratio=0.25,
-            location='New York, NY',
-            ceo='Jane Smith',
-            number_of_employees=3000,
-        )
-        mock_mismatched_data = [
-            MismatchedFields(field_name='fake name', stored_value='fake value', uploaded_value='fake value')]
-        validated_resp = DataDiscrepancyCheckerResponse(stored_data=mock_company_data,
-                                                        uploaded_data=mock_company_data,
-                                                        mismatched_fields=mock_mismatched_data)
-        expected_result = ('{"uploaded_data": {"company_name": "Fake", "industry": "Healthcare", '
-                           '"market_capitalization": 3000.0, "revenue": 1000.0, "ebitda": 250, "net_income": 80, '
-                           '"debt": 150, "equity": 666, "enterprise_value": 3150, "pe_ratio": 15, '
-                           '"revenue_growth_rate": 12, "ebitda_margin": 40, "net_income_margin": 8, "roe": 13.33, '
-                           '"roa": 10, "current_ratio": 1, "debt_to_equity_ratio": 0.25, "location": "New York, NY", '
-                           '"ceo": "Jane Smith", "number_of_employees": 3000}, "stored_data": {"company_name": '
-                           '"Fake", "industry": "Healthcare", "market_capitalization": 3000.0, "revenue": '
-                           '1000.0, "ebitda": 250, "net_income": 80, "debt": 150, "equity": 666, "enterprise_value": '
-                           '3150, "pe_ratio": 15, "revenue_growth_rate": 12, "ebitda_margin": 40, '
-                           '"net_income_margin": 8, "roe": 13.33, "roa": 10, "current_ratio": 1, '
-                           '"debt_to_equity_ratio": 0.25, "location": "New York, NY", "ceo": "Jane Smith", '
-                           '"number_of_employees": 3000}, "mismatched_fields": [{"field_name": "fake name", '
-                           '"uploaded_value": "fake value", "stored_value": "fake value"}]}')
-
-        result = validated_resp.to_json()
 
         self.assertEqual(result, expected_result)
 
@@ -247,9 +194,37 @@ class TestAPI(unittest.TestCase):
         Expect validated response from validate_pdf_company_data endpoint.
         """
 
+        # Mocking the response of the POST request
+        mock_company_data = CompanyData(
+            company_name='Fake',
+            industry='Healthcare',
+            market_capitalization=3000.0,
+            revenue=1000.00,
+            ebitda=250,
+            net_income=80,
+            debt=150,
+            equity=666,
+            enterprise_value=3150,
+            pe_ratio=15,
+            revenue_growth_rate=12,
+            ebitda_margin=40,
+            net_income_margin=8,
+            roe=13.33,
+            roa=10,
+            current_ratio=1,
+            debt_to_equity_ratio=0.25,
+            location='New York, NY',
+            ceo='Jane Smith',
+            number_of_employees=3000,
+        )
+        mock_mismatched_data = [
+            MismatchedFields(field_name='fake name', stored_value='fake value', uploaded_value='fake value')]
+        validated_resp = DataDiscrepancyCheckerResponse(stored_data=mock_company_data,
+                                                        uploaded_data=mock_company_data,
+                                                        mismatched_fields=mock_mismatched_data)
         mock_load_company_data.return_value = 'fake data'
         mock_extract_and_parse_pdf_data.return_value = 'fake data'
-        mock_validate_company_data.return_value.to_json.return_value = {'fake': 'response'}
+        mock_validate_company_data.return_value = validated_resp
 
         resp = self.client.post(
             '/company/validate-pdf-data',
@@ -257,7 +232,25 @@ class TestAPI(unittest.TestCase):
             files={'data_file': ('test_file.txt', self.file_like, 'application/pdf')}
         )
 
-        self.assertEqual(resp.json(), {'fake': 'response'})
+        self.assertEqual(resp.json(), {'uploaded_data': {'company_name': 'Fake',
+                                                         'industry': 'Healthcare', 'market_capitalization': 3000.0,
+                                                         'revenue': 1000.0, 'ebitda': 250, 'net_income': 80,
+                                                         'debt': 150, 'equity': 666, 'enterprise_value': 3150,
+                                                         'pe_ratio': 15, 'revenue_growth_rate': 12,
+                                                         'ebitda_margin': 40, 'net_income_margin': 8,
+                                                         'roe': 13.33, 'roa': 10, 'current_ratio': 1,
+                                                         'debt_to_equity_ratio': 0.25, 'location': 'New York, NY',
+                                                         'ceo': 'Jane Smith', 'number_of_employees': 3000},
+                                       'stored_data': {'company_name': 'Fake', 'industry': 'Healthcare',
+                                                       'market_capitalization': 3000.0, 'revenue': 1000.0, 'ebitda':
+                                                           250, 'net_income': 80, 'debt': 150, 'equity': 666,
+                                                       'enterprise_value': 3150, 'pe_ratio': 15,
+                                                       'revenue_growth_rate': 12, 'ebitda_margin': 40,
+                                                       'net_income_margin': 8, 'roe': 13.33, 'roa': 10,
+                                                       'current_ratio': 1, 'debt_to_equity_ratio': 0.25, 'location':
+                                                           'New York, NY', 'ceo': 'Jane Smith',
+                                                       'number_of_employees': 3000}, 'mismatched_fields': [{
+                'field_name': 'fake name', 'uploaded_value': 'fake value', 'stored_value': 'fake value'}]})
         self.assertEqual(resp.status_code, 200)
 
     def test_validate_pdf_company_data_return_data_error(self, mock_load_company_data, mock_extract_and_parse_pdf_data,
