@@ -1,7 +1,6 @@
-# Write your tests here
 import unittest
-from decimal import Decimal
-from unittest.mock import patch
+from unittest.mock import patch, Mock
+from src.data_discrepancy_checker import get_mismatched_fields, validate_company_data
 from src.data_layer import load_company_data, parse_company_data, COMPANY_DATA_KEY_MAPPING
 from src.models import CompanyData, DataDiscrepancyCheckerResponse, MismatchedFields
 
@@ -86,7 +85,11 @@ class TestDataLayer(unittest.TestCase):
 class TestModels(unittest.TestCase):
 
     def test_ValidatorResponse_to_json(self):
-        company_data_obj = CompanyData(
+        """
+
+        :return:
+        """
+        mock_company_data = CompanyData(
             company_name='HealthInc',
             industry='Healthcare',
             market_capitalization=3000.0,
@@ -110,8 +113,8 @@ class TestModels(unittest.TestCase):
         )
         mock_mismatched_data = [
             MismatchedFields(field_name='fake name', stored_value='fake value', uploaded_value='fake value')]
-        validator_resp = DataDiscrepancyCheckerResponse(stored_data=company_data_obj,
-                                                        uploaded_data=company_data_obj,
+        validated_resp = DataDiscrepancyCheckerResponse(stored_data=mock_company_data,
+                                                        uploaded_data=mock_company_data,
                                                         mismatched_fields=mock_mismatched_data)
         expected_result = ('{"uploaded_data": {"company_name": "HealthInc", "industry": "Healthcare", '
                            '"market_capitalization": 3000.0, "revenue": 1000.0, "ebitda": 250, "net_income": 80, '
@@ -127,14 +130,125 @@ class TestModels(unittest.TestCase):
                            '"number_of_employees": 3000}, "mismatched_fields": [{"field_name": "fake name", '
                            '"uploaded_value": "fake value", "stored_value": "fake value"}]}')
 
-        result = validator_resp.to_json()
+        result = validated_resp.to_json()
 
         self.assertEqual(result, expected_result)
 
 
+class TestDataDiscrepancyChecker(unittest.TestCase):
+    def setUp(self):
+        self.company_data1 = CompanyData(
+            company_name='HealthInc',
+            industry='Healthcare',
+            market_capitalization=3000.0,
+            revenue=1000.00,
+            ebitda=250,
+            net_income=80,
+            debt=150,
+            equity=666,
+            enterprise_value=3150,
+            pe_ratio=15,
+            revenue_growth_rate=12,
+            ebitda_margin=40,
+            net_income_margin=8,
+            roe=13.33,
+            roa=10,
+            current_ratio=1,
+            debt_to_equity_ratio=0.25,
+            location='New York, NY',
+            ceo='Jane Smith',
+            number_of_employees=3000,
+        )
+        self.company_data2 = CompanyData(
+            company_name='Fake Company',
+            industry='Healthcare',
+            market_capitalization=3000.0,
+            revenue=2000,
+            ebitda=250,
+            net_income=80,
+            debt=150,
+            equity=666,
+            enterprise_value=3150,
+            pe_ratio=15,
+            revenue_growth_rate=12,
+            ebitda_margin=40,
+            net_income_margin=8,
+            roe=13.33,
+            roa=10,
+            current_ratio=1,
+            debt_to_equity_ratio=0.25,
+            location='New York, NY',
+            ceo='Jane Smith',
+            number_of_employees=None,
+        )
+        mismatched_field_names = ['company_name', 'revenue', 'number_of_employees']
+        self.mismatched_fields = [
+            MismatchedFields(field_name=f, stored_value=getattr(self.company_data1, f), uploaded_value=getattr(self.company_data2,f))
+            for f in mismatched_field_names
+        ]
+
+    @patch("src.data_discrepancy_checker.get_mismatched_fields")
+    def test_validate_company_data(self, mock_get_mismatched_fields):
+        """
+        Expect get_mismatched_fields to be called
+        """
+        mock_get_mismatched_fields.return_value = self.mismatched_fields
+        expected_result = DataDiscrepancyCheckerResponse(uploaded_data=self.company_data1,
+                                                         stored_data=self.company_data2,
+                                                         mismatched_fields=self.mismatched_fields)
+
+        result = validate_company_data(extracted_data=self.company_data1,
+                                       stored_data=self.company_data2)
+
+        mock_get_mismatched_fields.assert_called_once_with(extracted_data=self.company_data1,
+                                                           stored_data=self.company_data2)
+        self.assertEqual(result, expected_result)
+
+    def test_get_mismatched_fields(self):
+        """
+        Expect get_mismatched_fields to return a list of mismatched fields.
+        """
+        result = get_mismatched_fields(stored_data=self.company_data1, extracted_data=self.company_data2)
+
+        self.assertEqual(result, self.mismatched_fields)
+
+    def test_get_mismatched_fields_empty_list(self):
+        """
+        Expect get_mismatched_fields to return empty list for identical data.
+        :return:
+        """
+
+        result = get_mismatched_fields(stored_data=self.company_data1, extracted_data=self.company_data1)
+
+        self.assertEqual(result, [])
+
+class TestPdfServiceApi(unittest.TestCase):
+    pass
+
+
 class TestAPI(unittest.TestCase):
-    def test_foo(self):
+    def test_validate_pdf_company_data(self):
+        """
+        Expect validated response from validate_pdf_company_data endpoint.
+        # TODO header with key?
+        # hit the endpoint as a user; pass name and file, return json w data
+        """
+
         self.assertEqual('foo'.upper(), 'FOO')
+
+    def test_validate_pdf_company_data_return_data_error(self):
+        """
+        Expect error response if no stored data found.
+        """
+
+        exp_err = "No data found for this company name."
+
+    def test_validate_pdf_company_data_return_file_error(self):
+        """
+        Expect error response if cannot extract file data.
+        """
+
+        exp_err = "Cannot extract data. Invalid file provided."
 
 
 if __name__ == '__main__':

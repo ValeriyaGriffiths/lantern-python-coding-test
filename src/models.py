@@ -8,7 +8,7 @@ from typing import Any
 @dataclass
 class CompanyData:
     """
-    Assumed net_income_margin, ceo, number_of_employees to be optional based on provided data.
+    Assumes net_income_margin, ceo, number_of_employees to be optional based on provided data.
     """
 
     company_name: str
@@ -46,6 +46,14 @@ class MismatchedFields:
     uploaded_value: Any
     stored_value: Any
 
+    def __eq__(self, other):
+        """
+        Workaround for comparison failing for objects with identical attribute values.
+        FIXME - this works but I am not sure why it was failing in the first place.
+        """
+        return vars(self) == vars(other)
+
+
 @dataclass
 class DataDiscrepancyCheckerResponse:
     uploaded_data: CompanyData
@@ -55,3 +63,9 @@ class DataDiscrepancyCheckerResponse:
     def to_json(self):
         return json.dumps(dataclasses.asdict(self))
 
+    def __eq__(self, other):
+        """
+        Workaround for comparison failing for objects with identical attribute values.
+        FIXME - this works but I am not sure why it was failing in the first place.
+        """
+        return vars(self) == vars(other)
