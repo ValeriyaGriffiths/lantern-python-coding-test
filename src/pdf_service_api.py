@@ -1,5 +1,4 @@
 from src.pdf_service import PdfService
-from src.data_layer import parse_company_data
 from src.models import CompanyData
 from src.config import settings
 

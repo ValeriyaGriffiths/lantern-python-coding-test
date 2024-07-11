@@ -1,4 +1,3 @@
-from dataclasses import fields
 from src.models import CompanyData, MismatchedFields, DataDiscrepancyCheckerResponse
 
 

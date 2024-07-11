@@ -7,6 +7,7 @@ from src.data_layer import load_company_data
 from src.models import CompanyData, DataDiscrepancyCheckerResponse, MismatchedFields
 from fastapi.testclient import TestClient
 from main import app
+from src.pdf_service_api import extract_and_parse_pdf_data
 
 test_company_data = {
     'Company Name': 'HealthInc',
@@ -199,6 +200,16 @@ class TestAPI(unittest.TestCase):
 
         self.assertEqual(resp.json(), {"error": "fake ex"})
         self.assertEqual(resp.status_code, 400)
+
+
+class TestPdfServiceCaller(unittest.TestCase):
+    @patch('pdf_service_api.PdfService.extract')
+    def test_extract_and_parse_pdf_data(self, mock_extract):
+        mock_extract.return_value = test_company_data
+
+        extract_and_parse_pdf_data(company_name='FakeCompany', pdf_file='Fake File')
+
+        mock_extract.assert_called_once_with(file_path="assets/fakecompany.pdf")
 
 
 if __name__ == '__main__':
