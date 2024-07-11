@@ -29,13 +29,6 @@ class CompanyData(BaseModel):
     ceo: Optional[str] = Field(None, alias="CEO")
     number_of_employees: Optional[int] = Field(None, alias="Number of Employees")
 
-    def __eq__(self, other):
-        """
-        Workaround for comparison failing for objects with identical attribute values.
-        FIXME - this works but I am not sure why it was failing in the first place.
-        """
-        return vars(self) == vars(other)
-
 
 class MismatchedFields(BaseModel):
     field_name: str
