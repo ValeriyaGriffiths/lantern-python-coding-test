@@ -173,12 +173,6 @@ class TestDataDiscrepancyChecker(unittest.TestCase):
         self.assertEqual(result, [])
 
 
-class TestPdfServiceApi(unittest.TestCase):
-    @patch('src.pdf_service_api.parse_company_data')
-    def test_extract_and_parse_pdf_data(self, mock_parse_company_data):
-        pass
-
-
 @patch('main.validate_company_data')
 @patch('main.extract_and_parse_pdf_data')
 @patch('main.load_company_data')

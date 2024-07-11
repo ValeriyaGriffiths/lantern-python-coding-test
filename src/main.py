@@ -18,6 +18,7 @@ async def validate_pdf_company_data(company_name: str, data_file: UploadFile = F
     :param data_file: pdf containing company data
     :return: json response with format matching DataDiscrepancyCheckerResponse
     """
+    # strip any spaces to ensure we find the company file and data
     company_name = company_name.strip()
 
     stored_data = load_company_data(company_name)
