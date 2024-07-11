@@ -6,11 +6,18 @@ The endpoint expects a company name query parameter and a pdf file.
 The response looks roughly as follows:
 ```json
 {
-    uploaded_data: { extracted data from pdf... }
-    stored_data: { preexisting data stored on this service... }
-    mismatched_fields: {[
-            {field_name: ... , uploaded_value: ... , stored_value: ... },
-        ]}
+  "uploaded_data": {
+    "extracted data from pdf": "..."
+  },
+  "stored_data": { 
+     "existing data stored on this service": "..."
+  },
+  "mismatched_fields": [
+    {
+      "field_name": "...",
+      "uploaded_value": "...",
+      "stored_value": "..."
+    }]
 }
 ```
 
