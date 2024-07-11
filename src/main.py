@@ -1,12 +1,8 @@
 from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import JSONResponse
-from data_layer import load_company_data, parse_company_data
-# from data_validator import validate
-from models import CompanyData, MismatchedFields, DataDiscrepancyCheckerResponse
-from pdf_service import PdfService
-
-
-pdfs = PdfService(key="TEST_KEY")
+from data_layer import load_company_data
+from data_discrepancy_checker import validate_company_data
+from src import pdf_service_api
 
 app = FastAPI()
 
@@ -16,37 +12,27 @@ def read_root():
     return {"Hello": "World"}
 
 
-@app.post("/company/validate-pdf")
-def validate_company_pdf(company_name: str, data_file: UploadFile = File(...)):
+@app.post("/company/validate-pdf-data")
+def validate_pdf_company_data(company_name: str, data_file: UploadFile = File(...)):
     """
-    Take company name and a pdf with company data and validates the data against stored data.
+    Take company name and a pdf with company data and validate the data against stored data.
     Returns extracted pdf data, stored data, and list of mismatched fields.
 
-    Assumed that we take company_name as an input (not super clear from README).
-    """
+    Assume that we take company_name as an input (not super clear from README).
+
+   :param company_name: company name
+   :param data_file: pdf containing company data
+   :return: json response with format matching DataDiscrepancyCheckerResponse
+   """
 
     stored_data = load_company_data(company_name)
+    if not stored_data:
+        return JSONResponse(content={"error": "No stored data found for this company"}, status_code=500)
 
-    if not stored_data: 
-        # TODO
-        return JSONResponse(status_code=500)
+    try:
+        extracted_data = pdf_service_api.extract_and_parse_pdf_data(company_name=company_name, pdf_file=data_file)
+    except FileNotFoundError as ex:
+        return JSONResponse(content={"error": ex.args[0]}, status_code=500)
 
-    extracted_data: CompanyData = parse_company_data(pdfs.extract(file_path="assets/retailco.pdf"))
-
-    mismatched_fields: list[MismatchedFields] = []
-    # validate(uploaded_data=extracted_data, stored_data=stored_data)
-
-    validator_response = DataDiscrepancyCheckerResponse(uploaded_data=extracted_data, stored_data=stored_data, mismatched_fields=mismatched_fields)
-    
-
-    # assumed company name is provided by user, assume exact match
-    # env var or pass in as a header
-    # hash file content for idempotency key <- file path; reject if identical name 
-    # read data from csv and deserialise
-    # get data from pdf service -> by file path
-    # output {company_name: {pdf: ..., stored:..., match: true/false}}
-    #  uploaded_data: {.... }, stored_data: {.. } mismatched_fields: {company_name, stock_price,}
-    # could reduce payload size later
-
-    return JSONResponse(content=validator_response.to_json(), status_code=200)
-
+    validated_response = validate_company_data(extracted_data=extracted_data, stored_data=stored_data)
+    return JSONResponse(content=validated_response.to_json(), status_code=200)
