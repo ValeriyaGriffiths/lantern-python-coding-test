@@ -9,7 +9,7 @@ from src.models import DataDiscrepancyCheckerResponse
 app = FastAPI(debug=settings.debug)
 
 
-@app.post("/company/validate-pdf-data", response_model=DataDiscrepancyCheckerResponse)
+@app.post("/company/validate-pdf-data", response_model=DataDiscrepancyCheckerResponse, response_model_by_alias=False)
 async def validate_pdf_company_data(company_name: str, data_file: UploadFile = File(...)):
     """
     Take company name and a pdf with company data and validate the data against stored data.

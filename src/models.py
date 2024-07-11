@@ -1,7 +1,6 @@
-from dataclasses import dataclass
 from decimal import Decimal
 from typing import Any, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class CompanyData(BaseModel):
@@ -28,6 +27,10 @@ class CompanyData(BaseModel):
     location: str = Field(alias="Location")
     ceo: Optional[str] = Field(None, alias="CEO")
     number_of_employees: Optional[int] = Field(None, alias="Number of Employees")
+
+    model_config = ConfigDict(
+        populate_by_name=True,
+    )
 
 
 class MismatchedFields(BaseModel):
