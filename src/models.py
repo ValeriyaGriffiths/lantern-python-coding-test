@@ -3,7 +3,7 @@ import json
 from dataclasses import dataclass
 from decimal import Decimal
 from typing import Any
-
+from pydantic import BaseModel
 
 @dataclass
 class CompanyData:
@@ -54,15 +54,10 @@ class MismatchedFields:
         return vars(self) == vars(other)
 
 
-@dataclass
-class DataDiscrepancyCheckerResponse:
+class DataDiscrepancyCheckerResponse(BaseModel):
     uploaded_data: CompanyData
     stored_data: CompanyData
     mismatched_fields: list[MismatchedFields]
-
-    def to_json(self):
-        # TODO fix Decimal issue
-        return json.dumps(dataclasses.asdict(self))
 
     def __eq__(self, other):
         """
