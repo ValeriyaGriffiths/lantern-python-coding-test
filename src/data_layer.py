@@ -1,30 +1,6 @@
 import csv
-import dataclasses
 from src.models import CompanyData
 from src.config import settings
-
-COMPANY_DATA_KEY_MAPPING = {
-    'company_name': 'Company Name',
-    'industry': 'Industry',
-    'market_capitalization': 'Market Capitalization',
-    'revenue': 'Revenue (in millions)',
-    'ebitda': 'EBITDA (in millions)',
-    'net_income': 'Net Income (in millions)',
-    'debt': 'Debt (in millions)',
-    'equity': 'Equity (in millions)',
-    'enterprise_value': 'Enterprise Value (in millions)',
-    'pe_ratio': 'P/E Ratio',
-    'revenue_growth_rate': 'Revenue Growth Rate (%)',
-    'ebitda_margin': 'EBITDA Margin (%)',
-    'net_income_margin': 'Net Income Margin (%)',
-    'roe': 'ROE (Return on Equity) (%)',
-    'roa': 'ROA (Return on Assets) (%)',
-    'current_ratio': 'Current Ratio',
-    'debt_to_equity_ratio': 'Debt to Equity Ratio',
-    'location': 'Location',
-    'ceo': 'CEO',
-    'number_of_employees': 'Number of Employees'
-}
 
 
 def load_company_data(company_name: str) -> CompanyData | None:
