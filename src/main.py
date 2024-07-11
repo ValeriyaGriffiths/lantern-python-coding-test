@@ -7,11 +7,6 @@ from src.pdf_service_api import extract_and_parse_pdf_data
 app = FastAPI()
 
 
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
-
-
 @app.post("/company/validate-pdf-data")
 async def validate_pdf_company_data(company_name: str, data_file: UploadFile = File(...)):
     """
@@ -22,7 +17,7 @@ async def validate_pdf_company_data(company_name: str, data_file: UploadFile = F
     :param data_file: pdf containing company data
     :return: json response with format matching DataDiscrepancyCheckerResponse
     """
-    company_name= company_name.strip()
+    company_name = company_name.strip()
 
     stored_data = load_company_data(company_name)
     if not stored_data:

@@ -1,9 +1,11 @@
+import io
 import unittest
-import requests
-from unittest.mock import patch, Mock
+from unittest.mock import patch
 from src.data_discrepancy_checker import get_mismatched_fields, validate_company_data
 from src.data_layer import load_company_data, parse_company_data, COMPANY_DATA_KEY_MAPPING
 from src.models import CompanyData, DataDiscrepancyCheckerResponse, MismatchedFields
+from fastapi.testclient import TestClient
+from main import app
 
 
 class TestDataLayer(unittest.TestCase):
@@ -230,36 +232,68 @@ class TestPdfServiceApi(unittest.TestCase):
         pass
 
 
+@patch('main.validate_company_data')
+@patch('main.extract_and_parse_pdf_data')
+@patch('main.load_company_data')
 class TestAPI(unittest.TestCase):
-    @patch('src.main.validate_company_data')
-    def test_validate_pdf_company_data(self, mock_validate_company_data):
+    client = TestClient(app)
+
+    def setUp(self):
+        self.file_like = io.BytesIO(b'fake pdf file.')
+
+    def test_validate_pdf_company_data(self, mock_load_company_data, mock_extract_and_parse_pdf_data,
+                                       mock_validate_company_data):
         """
         Expect validated response from validate_pdf_company_data endpoint.
-        # TODO header with key?
-        # hit the endpoint as a user; pass name and file, return json w data
         """
-        mock_validate_company_data = Mock()
+
+        mock_load_company_data.return_value = 'fake data'
+        mock_extract_and_parse_pdf_data.return_value = 'fake data'
         mock_validate_company_data.return_value.to_json.return_value = {'fake': 'response'}
 
-        resp = requests.get('http://example.com/api/123')
+        resp = self.client.post(
+            '/company/validate-pdf-data',
+            params={'company_name': 'fake company name'},
+            files={'data_file': ('test_file.txt', self.file_like, 'application/pdf')}
+        )
 
-        self.assertEqual(resp.message, {'fake': 'response'})
+        self.assertEqual(resp.json(), {'fake': 'response'})
         self.assertEqual(resp.status_code, 200)
 
-    def test_validate_pdf_company_data_return_data_error(self):
+    def test_validate_pdf_company_data_return_data_error(self, mock_load_company_data, mock_extract_and_parse_pdf_data,
+                                                         mock_validate_company_data):
         """
         Expect error response if no stored data found.
         """
-        resp = None
-        self.assertEqual(resp.message, "No data found for this company name.")
+
+        mock_load_company_data.return_value = None
+
+        resp = self.client.post(
+            '/company/validate-pdf-data',
+            params={'company_name': 'fake company name'},
+            files={'data_file': ('test_file.txt', self.file_like, 'application/pdf')}
+        )
+
+        self.assertEqual(resp.json(), {"error": "No data found for this company name."})
         self.assertEqual(resp.status_code, 500)
 
-    def test_validate_pdf_company_data_return_file_error(self):
+    def test_validate_pdf_company_data_return_file_error(self, mock_load_company_data, mock_extract_and_parse_pdf_data,
+                                                         mock_validate_company_data):
         """
         Expect error response if cannot extract file data.
         """
-        resp = None
-        self.assertEqual(resp.message,"Cannot extract data. Invalid file provided.")
+
+        mock_load_company_data.return_value = 'fake data'
+        mock_extract_and_parse_pdf_data.side_effect = FileNotFoundError('fake ex')
+        mock_validate_company_data.return_value.to_json.return_value = {'fake': 'response'}
+
+        resp = self.client.post(
+            '/company/validate-pdf-data',
+            params={'company_name': 'fake company name'},
+            files={'data_file': ('test_file.txt', self.file_like, 'application/pdf')}
+        )
+
+        self.assertEqual(resp.json(), {"error": "fake ex"})
         self.assertEqual(resp.status_code, 400)
 
 
