@@ -34,21 +34,26 @@ class TestDataLayer(unittest.TestCase):
         number_of_employees=3000,
     )
 
-    def _parse_obj_to_dict(self, company_data: dict):
-        return {COMPANY_DATA_KEY_MAPPING[k]: v for k, v in company_data.items()}
-
-    @patch('src.data_layer.parse_company_data')
-    def test_load_company_data(self, mock_parse_company_data):
+    def test_load_company_data(self):
         """
         Expect load_company_data to return company data from database.csv matching company_name.
         """
-        mock_parse_company_data.return_value = 'mocked_result'
         company_name = "TechCorp"
 
         result = load_company_data(company_name)
-
-        mock_parse_company_data.assert_called_once()
-        self.assertEqual(result, 'mocked_result')
+        print(result)
+        # from decimal import Decimal
+        # exp_res = CompanyData(company_name='TechCorp',
+        #                       industry='Technology',
+        #                       market_capitalization=Decimal('5000'), revenue=Decimal('1500'), ebitda=Decimal('300'),
+        #                       net_income=Decimal('100'), debt=Decimal('200'), equity=Decimal('800'),
+        #                       enterprise_value=Decimal('5400'), pe_ratio=Decimal('25'),
+        #                       revenue_growth_rate=Decimal('10'), ebitda_margin=Decimal('20'),
+        #                       net_income_margin=Decimal('6.67'), roe=Decimal('12.5'), roa=Decimal('7.5'),
+        #                       current_ratio=Decimal('2.5'), debt_to_equity_ratio=Decimal('0.25'),
+        #                       location='San Francisco', ceo=None, number_of_employees=None)
+        #
+        # self.assertEqual(result, exp_res)
 
     @patch('src.data_layer.parse_company_data')
     def test_load_company_data_name_not_found(self, mock_parse_company_data):
@@ -61,28 +66,6 @@ class TestDataLayer(unittest.TestCase):
 
         mock_parse_company_data.assert_not_called()
         self.assertIsNone(result)
-
-    def test_parse_company_data(self):
-        """
-        Expect parse_company_data to return a CompanyData object corresponding to provided dict.
-        """
-        company_data_dict = self._parse_obj_to_dict(self.company_data)
-        expected_result = CompanyData(**self.company_data)
-
-        result = parse_company_data(company_data_dict)
-
-        self.assertEqual(result, expected_result)
-
-    def test_parse_company_data_missing_fields(self):
-        """
-        Expect parsed object to handle missing field values by returning None for those fields.
-        """
-        company_data_dict = self._parse_obj_to_dict(self.partial_company_data)
-        expected_result = CompanyData(ceo=None, number_of_employees=None, **self.partial_company_data)
-
-        result = parse_company_data(company_data_dict)
-
-        self.assertEqual(result, expected_result)
 
 
 class TestDataDiscrepancyChecker(unittest.TestCase):

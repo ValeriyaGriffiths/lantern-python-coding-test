@@ -21,14 +21,15 @@ def get_mismatched_fields(extracted_data: CompanyData, stored_data: CompanyData)
     :param stored_data: CompanyData object to compare extracted data against
     :return: list containing mismatched fields (if any)
     """
+    extracted_dict = extracted_data.model_dump()
+    stored_dict = stored_data.model_dump()
 
     mismatched_fields = []
-    for field in fields(CompanyData):
-        extracted_field = getattr(extracted_data, field.name)
-        stored_field = getattr(stored_data, field.name)
-        if extracted_field != stored_field:
-            mismatched_fields.append(
-                MismatchedFields(field_name=field.name, uploaded_value=extracted_field, stored_value=stored_field))
+    for key in extracted_dict.keys():
+        stored = stored_dict.get(key)
+        uploaded = extracted_dict.get(key)
+        if stored != uploaded:
+            mismatched_fields.append(MismatchedFields(field_name=key, uploaded_value=uploaded, stored_value=stored))
 
     return mismatched_fields
 

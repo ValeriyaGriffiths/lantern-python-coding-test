@@ -13,12 +13,11 @@ def extract_and_parse_pdf_data(company_name: str, pdf_file) -> CompanyData:
     :return: CompanyData object containing extracted data
     """
 
-    # passing this in from data checker a real service might take a token in the request header, but using hard-coded key here for mocked service.
+    # this is a mocked service
     pdfs = PdfService(key=settings.api_key)
 
     # realistically, we might want a db table containing records of uploaded company files with
     # e.g. company_name, file_path, etc.
-    # passing parsed company_name to mocked service here for simplicity.
-    return parse_company_data(pdfs.extract(file_path=f"assets/{company_name.lower()}.pdf"))
-
-
+    # ignoring pdf_file and parsing company_name directly into file path for simplicity.
+    extracted_company_data = (pdfs.extract(file_path=f"assets/{company_name.lower()}.pdf"))
+    return CompanyData(**extracted_company_data)

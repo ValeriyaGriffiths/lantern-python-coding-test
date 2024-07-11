@@ -1,33 +1,33 @@
 from dataclasses import dataclass
-from typing import Any
-from pydantic import BaseModel
+from decimal import Decimal
+from typing import Any, Optional
+from pydantic import BaseModel, Field
 
-@dataclass
-class CompanyData:
+
+class CompanyData(BaseModel):
     """
     Assumes net_income_margin, ceo, number_of_employees to be optional based on provided data.
     """
-
-    company_name: str
-    industry: str
-    market_capitalization: float
-    revenue: float
-    ebitda: float
-    net_income: float
-    debt: float
-    equity: float
-    enterprise_value: float
-    pe_ratio: float
-    revenue_growth_rate: float
-    ebitda_margin: float
-    net_income_margin: float | None
-    roe: float
-    roa: float
-    current_ratio: float
-    debt_to_equity_ratio: float
-    location: str
-    ceo: str | None
-    number_of_employees: int | None
+    company_name: str = Field(alias="Company Name")
+    industry: str = Field(alias="Industry")
+    market_capitalization: Decimal = Field(alias="Market Capitalization")
+    revenue: Decimal = Field(alias="Revenue (in millions)")
+    ebitda: Decimal = Field(alias="EBITDA (in millions)")
+    net_income: Decimal = Field(alias="Net Income (in millions)")
+    debt: Decimal = Field(alias="Debt (in millions)")
+    equity: Decimal = Field(alias="Equity (in millions)")
+    enterprise_value: Decimal = Field(alias="Enterprise Value (in millions)")
+    pe_ratio: Decimal = Field(alias="P/E Ratio")
+    revenue_growth_rate: Decimal = Field(alias="Revenue Growth Rate (%)")
+    ebitda_margin: Decimal = Field(alias="EBITDA Margin (%)")
+    net_income_margin: Optional[Decimal] = Field(None, alias="Net Income Margin (%)")
+    roe: Decimal = Field(alias="ROE (Return on Equity) (%)")
+    roa: Decimal = Field(alias="ROA (Return on Assets) (%)")
+    current_ratio: Optional[Decimal] = Field(None, alias="Current Ratio")
+    debt_to_equity_ratio: Decimal = Field(alias="Debt to Equity Ratio")
+    location: str = Field(alias="Location")
+    ceo: Optional[str] = Field(None, alias="CEO")
+    number_of_employees: Optional[int] = Field(None, alias="Number of Employees")
 
     def __eq__(self, other):
         """
@@ -37,8 +37,7 @@ class CompanyData:
         return vars(self) == vars(other)
 
 
-@dataclass
-class MismatchedFields:
+class MismatchedFields(BaseModel):
     field_name: str
     uploaded_value: Any
     stored_value: Any

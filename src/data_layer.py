@@ -26,9 +26,7 @@ COMPANY_DATA_KEY_MAPPING = {
     'number_of_employees': 'Number of Employees'
 }
 
-import os
-ENV = os.getenv('ENVIRONMENT')
-test_db_location = "../data/database.csv"
+
 def load_company_data(company_name: str) -> CompanyData | None:
     """
     Fetch stored company data matching company name. Return None if no match found.
@@ -41,7 +39,7 @@ def load_company_data(company_name: str) -> CompanyData | None:
         reader = csv.DictReader(csvfile)
         for row in reader:
             if row['Company Name'] == company_name:
-                return parse_company_data(row)
+                return CompanyData(**row)
 
     return None
 
@@ -54,12 +52,4 @@ def parse_company_data(company_data: dict) -> CompanyData:
     :return: CompanyData object
     """
 
-    parsed_fields = {}
-    for f in dataclasses.fields(CompanyData):
-        field_value = company_data.get(COMPANY_DATA_KEY_MAPPING[f.name])
-        parsed_fields[f.name] = float(field_value) if field_value and f.type == float else field_value
-
-    #     TODO does not work with int?Optional
-
-    return CompanyData(**parsed_fields)
-
+    return CompanyData(**company_data)
