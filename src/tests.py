@@ -1,6 +1,6 @@
 import io
 import unittest
-from unittest.mock import patch, Mock
+from unittest.mock import patch
 from src.data_discrepancy_checker import get_mismatched_fields, validate_company_data
 from src.data_layer import load_company_data, parse_company_data, COMPANY_DATA_KEY_MAPPING
 from src.models import CompanyData, DataDiscrepancyCheckerResponse, MismatchedFields

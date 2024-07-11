@@ -1,11 +1,12 @@
 from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import JSONResponse
+from src.config import settings
 from src.data_layer import load_company_data
 from src.data_discrepancy_checker import validate_company_data
 from src.pdf_service_api import extract_and_parse_pdf_data
 from src.models import DataDiscrepancyCheckerResponse
 
-app = FastAPI()
+app = FastAPI(debug=settings.debug)
 
 
 @app.post("/company/validate-pdf-data", response_model=DataDiscrepancyCheckerResponse)

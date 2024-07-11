@@ -1,6 +1,7 @@
 from src.pdf_service import PdfService
 from src.data_layer import parse_company_data
 from src.models import CompanyData
+from src.config import settings
 
 
 def extract_and_parse_pdf_data(company_name: str, pdf_file) -> CompanyData:
@@ -13,7 +14,7 @@ def extract_and_parse_pdf_data(company_name: str, pdf_file) -> CompanyData:
     """
 
     # passing this in from data checker a real service might take a token in the request header, but using hard-coded key here for mocked service.
-    pdfs = PdfService(key="TEST_KEY")
+    pdfs = PdfService(key=settings.api_key)
 
     # realistically, we might want a db table containing records of uploaded company files with
     # e.g. company_name, file_path, etc.
