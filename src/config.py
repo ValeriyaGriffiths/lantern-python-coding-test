@@ -11,6 +11,12 @@ if environment == "DEV":
         debug: bool = True
         api_key: str = 'TEST_KEY'
         db_location: str = 'data/database.csv'
+elif environment == "TEST":
+    class Settings(BaseSettings):
+        environment: str = environment
+        debug: bool = True
+        api_key: str = 'TEST_KEY'
+        db_location: str = '../data/database.csv'
 elif environment == "PROD":
     class Settings(BaseSettings):
         environment: str = environment

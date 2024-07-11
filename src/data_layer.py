@@ -1,6 +1,5 @@
 import csv
 import dataclasses
-from decimal import Decimal
 from src.models import CompanyData
 from src.config import settings
 
@@ -27,7 +26,9 @@ COMPANY_DATA_KEY_MAPPING = {
     'number_of_employees': 'Number of Employees'
 }
 
-
+import os
+ENV = os.getenv('ENVIRONMENT')
+test_db_location = "../data/database.csv"
 def load_company_data(company_name: str) -> CompanyData | None:
     """
     Fetch stored company data matching company name. Return None if no match found.
@@ -35,6 +36,7 @@ def load_company_data(company_name: str) -> CompanyData | None:
     :param company_name: name of company
     :return: CompanyData object if found, otherwise None
     """
+
     with open(settings.db_location, newline='') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
