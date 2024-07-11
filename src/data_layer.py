@@ -2,6 +2,7 @@ import csv
 import dataclasses
 from decimal import Decimal
 from src.models import CompanyData
+from src.config import settings
 
 COMPANY_DATA_KEY_MAPPING = {
     'company_name': 'Company Name',
@@ -34,7 +35,7 @@ def load_company_data(company_name: str) -> CompanyData | None:
     :param company_name: name of company
     :return: CompanyData object if found, otherwise None
     """
-    with open('data/database.csv', newline='') as csvfile:
+    with open(settings.db_location, newline='') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
             if row['Company Name'] == company_name:
@@ -51,5 +52,12 @@ def parse_company_data(company_data: dict) -> CompanyData:
     :return: CompanyData object
     """
 
-    parsed_fields = {f.name: company_data.get(COMPANY_DATA_KEY_MAPPING[f.name]) for f in dataclasses.fields(CompanyData)}
+    parsed_fields = {}
+    for f in dataclasses.fields(CompanyData):
+        field_value = company_data.get(COMPANY_DATA_KEY_MAPPING[f.name])
+        parsed_fields[f.name] = float(field_value) if field_value and f.type == float else field_value
+
+    #     TODO does not work with int?Optional
+
     return CompanyData(**parsed_fields)
+
