@@ -51,9 +51,5 @@ def parse_company_data(company_data: dict) -> CompanyData:
     :return: CompanyData object
     """
 
-    parsed_fields = {}
-    for f in dataclasses.fields(CompanyData):
-        field_value = company_data.get(COMPANY_DATA_KEY_MAPPING[f.name])
-        parsed_fields[f.name] = Decimal(field_value) if field_value and f.type == Decimal else field_value
-
+    parsed_fields = {f.name: company_data.get(COMPANY_DATA_KEY_MAPPING[f.name]) for f in dataclasses.fields(CompanyData)}
     return CompanyData(**parsed_fields)

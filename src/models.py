@@ -1,7 +1,4 @@
-import dataclasses
-import json
 from dataclasses import dataclass
-from decimal import Decimal
 from typing import Any
 from pydantic import BaseModel
 
@@ -13,21 +10,21 @@ class CompanyData:
 
     company_name: str
     industry: str
-    market_capitalization: Decimal
-    revenue: Decimal
-    ebitda: Decimal
-    net_income: Decimal
-    debt: Decimal
-    equity: Decimal
-    enterprise_value: Decimal
-    pe_ratio: Decimal
-    revenue_growth_rate: Decimal
-    ebitda_margin: Decimal
-    net_income_margin: Decimal | None
-    roe: Decimal
-    roa: Decimal
-    current_ratio: Decimal
-    debt_to_equity_ratio: Decimal
+    market_capitalization: float
+    revenue: float
+    ebitda: float
+    net_income: float
+    debt: float
+    equity: float
+    enterprise_value: float
+    pe_ratio: float
+    revenue_growth_rate: float
+    ebitda_margin: float
+    net_income_margin: float | None
+    roe: float
+    roa: float
+    current_ratio: float
+    debt_to_equity_ratio: float
     location: str
     ceo: str | None
     number_of_employees: int | None
