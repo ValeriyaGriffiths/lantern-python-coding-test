@@ -24,7 +24,7 @@ async def validate_pdf_company_data(company_name: str, data_file: UploadFile = F
 
     stored_data = load_company_data(company_name)
     if not stored_data:
-        return JSONResponse(content={"error": "No data found for this company name."}, status_code=500)
+        return JSONResponse(content={"error": "No data found for this company name."}, status_code=400)
 
     try:
         extracted_data = extract_and_parse_pdf_data(company_name=company_name, pdf_file=data_file)

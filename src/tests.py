@@ -180,7 +180,7 @@ class TestAPI(unittest.TestCase):
         )
 
         self.assertEqual(resp.json(), {"error": "No data found for this company name."})
-        self.assertEqual(resp.status_code, 500)
+        self.assertEqual(resp.status_code, 400)
 
     def test_validate_pdf_company_data_return_file_error(self, mock_load_company_data, mock_extract_and_parse_pdf_data,
                                                          mock_validate_company_data):

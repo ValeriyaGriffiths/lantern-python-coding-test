@@ -20,7 +20,8 @@ To run tests locally, the ENVIRONMENT environment variable needs to be set to TE
 
 ## Assumptions
 - User provides company name (assumed missing punctuation in README :) ), along with a pdf file.
-- PDF Service is an external microservice (with only 3 possible outputs) and is outside of scope
+- The company name should match an existing record, otherwise 400 error is returned.
+- PDF Service is an external microservice (with only 3 possible outputs) and is outside of scope.
 - Used decimal typing for all numeric fields (except for _number_of_employees_ which can safely be assumed as an int)
 - Assumed _net_income_margin_, _current_ratio_, _ceo_ and _number_of_employees_ to be optional based on provided test data
 - Response should include both sets of company data and mismatched fields.
